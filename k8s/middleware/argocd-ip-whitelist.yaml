@@ -1,0 +1,10 @@
+# middleware/argocd-ip-whitelist.yaml
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: argocd-ip-whitelist
+  namespace: argocd
+spec:
+  ipWhiteList:
+    sourceRange:
+      - 193.92.158.159/32
