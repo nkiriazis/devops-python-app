@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: python-app-staging
+  namespace: staging
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`python-app.staging.local`)
+      kind: Rule
+      services:
+        - name: python-app
+          port: 80
+      middlewares:
+        - name: ip-whitelist
+          namespace: default
