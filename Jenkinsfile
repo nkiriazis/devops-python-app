@@ -2,60 +2,52 @@
 //     agent any
 
 //     environment {
-//         DOCKER_IMAGE = 'nkiriazis/python-app'
-//         TAG = "latest"
+//         IMAGE_NAME = "returnick/python-app"
+//         DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
 //     }
 
 //     stages {
-//         stage('Clone') {
+//         stage('Checkout') {
 //             steps {
-//                 checkout scm
+//                 git branch: 'main', url: 'https://github.com/nkiriazis/python-app.git'
 //             }
 //         }
 
 //         stage('Build Docker Image') {
 //             steps {
 //                 script {
-//                     docker.build("${DOCKER_IMAGE}:${TAG}")
+//                     dockerImage = docker.build("${IMAGE_NAME}")
 //                 }
 //             }
 //         }
 
-//         stage('Login to DockerHub') {
+//         stage('Push to Docker Hub') {
 //             steps {
-//                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-//                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-//                 }
-//             }
-//         }
-
-//         stage('Push Docker Image') {
-//             steps {
+//               withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
 //                 script {
-//                     docker.image("${DOCKER_IMAGE}:${TAG}").push()
-//                 }
+//                   sh """
+//                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+//                     docker push $IMAGE_NAME
+//                   """
 //             }
+//           }
 //         }
+//       }
 //     }
+//   }
+// }   
 
-//     post {
-//         always {
-//             sh 'docker logout'
-//         }
-//     }
-// }
 pipeline {
     agent any
 
     environment {
         IMAGE_NAME = "returnick/python-app"
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/nkiriazis/python-app.git'
+                git 'https://github.com/nkiriazis/python-app.git'
             }
         }
 
@@ -69,9 +61,12 @@ pipeline {
 
         stage('Push to Docker Hub') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
-                        dockerImage.push("latest")
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    script {
+                        sh """
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            docker push ${IMAGE_NAME}
+                        """
                     }
                 }
             }
