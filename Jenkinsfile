@@ -2,37 +2,34 @@
 //     agent any
 
 //     environment {
-//         DOCKER_IMAGE = 'nkiriazis/python-app'
-//         TAG = "latest"
+//         IMAGE_NAME = "returnick/python-app"
+//         IMAGE_TAG = "latest"
 //     }
 
 //     stages {
-//         stage('Clone') {
+//         stage('Checkout') {
 //             steps {
-//                 checkout scm
+//                 git branch: 'main', url: 'https://github.com/nkiriazis/python-app.git'
 //             }
 //         }
 
 //         stage('Build Docker Image') {
 //             steps {
 //                 script {
-//                     docker.build("${DOCKER_IMAGE}:${TAG}")
+//                     dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
 //                 }
 //             }
 //         }
 
-//         stage('Login to DockerHub') {
+//         stage('Push to Docker Hub') {
 //             steps {
 //                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-//                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-//                 }
-//             }
-//         }
-
-//         stage('Push Docker Image') {
-//             steps {
-//                 script {
-//                     docker.image("${DOCKER_IMAGE}:${TAG}").push()
+//                     script {
+//                         sh '''
+//                             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+//                             docker push ${IMAGE_NAME}:${IMAGE_TAG}
+//                         '''
+//                     }
 //                 }
 //             }
 //         }
@@ -40,16 +37,23 @@
 
 //     post {
 //         always {
-//             sh 'docker logout'
+//             echo 'Cleaning up Docker credentials...'
+//             sh 'docker logout || true'
 //         }
 //     }
 // }
+
+// Jenkinsfile (Improved Tagging)
 pipeline {
     agent any
 
     environment {
         IMAGE_NAME = "returnick/python-app"
-        IMAGE_TAG = "latest"
+        // Use build number for unique tag, and also tag with 'latest'
+        IMAGE_TAG_BUILD = "${env.BUILD_NUMBER}"
+        IMAGE_TAG_LATEST = "latest"
+        # Optional: Add Git commit SHA for even better traceability
+        # GIT_COMMIT = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
     }
 
     stages {
@@ -62,19 +66,20 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
+                    // Build and tag with both build number and latest
+                    dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG_BUILD}", ".")
+                    dockerImage.tag("${IMAGE_NAME}:${IMAGE_TAG_LATEST}")
                 }
             }
         }
 
         stage('Push to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    script {
-                        sh '''
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                        '''
+                script {
+                    // Using docker.withRegistry for cleaner authentication
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-creds') {
+                        dockerImage.push("${IMAGE_TAG_BUILD}")
+                        dockerImage.push("${IMAGE_TAG_LATEST}")
                     }
                 }
             }
@@ -83,8 +88,10 @@ pipeline {
 
     post {
         always {
-            echo 'Cleaning up Docker credentials...'
-            sh 'docker logout || true'
+            echo 'Cleaning up Docker images on agent...'
+            // Clean up local images to save space, ignore errors if image doesn't exist
+            sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG_BUILD} || true"
+            sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG_LATEST} || true"
         }
     }
 }
