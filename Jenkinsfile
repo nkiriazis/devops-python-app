@@ -49,19 +49,20 @@ pipeline {
 
     environment {
         IMAGE_NAME = "returnick/python-app"
+        IMAGE_TAG = "latest"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/nkiriazis/python-app.git'
+                git branch: 'main', url: 'https://github.com/nkiriazis/python-app.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    dockerImage = docker.build("${IMAGE_NAME}")
+                    dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
                 }
             }
         }
@@ -72,11 +73,18 @@ pipeline {
                     script {
                         sh """
                             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker push ${IMAGE_NAME}:latest
+                            docker push ${IMAGE_NAME}:${IMAGE_TAG}
                         """
                     }
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning up Docker credentials...'
+            sh 'docker logout || true'
         }
     }
 }
