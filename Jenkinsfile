@@ -49,13 +49,12 @@ pipeline {
 
     environment {
         IMAGE_NAME = "returnick/python-app"
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/nkiriazis/python-app.git'
+                git 'https://github.com/nkiriazis/python-app.git'
             }
         }
 
@@ -67,31 +66,14 @@ pipeline {
             }
         }
 
-//         stage('Push to Docker Hub') {
-//             steps {
-//               withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-//                 script {
-//                   sh """
-//                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-//                     docker push $IMAGE_NAME
-//                   """
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-// } 
-
-    stage('Push to Docker Hub') {
-                steps {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        script {
-                            sh """
-                                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                                docker push ${IMAGE_NAME}
-                            """
-                        }
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    script {
+                        sh """
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            docker push ${IMAGE_NAME}:latest
+                        """
                     }
                 }
             }
