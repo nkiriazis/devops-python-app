@@ -124,8 +124,7 @@ pipeline {
 
                         // Now, tag the *already built* dockerImage with the 'latest' tag.
                         // You simply pass the full new tag string.
-                        dockerImage.tag("${IMAGE_NAME}:${IMAGE_TAG_LATEST}") // This line is the fix!
-                }
+                        dockerImage.tag(IMAGE_TAG_LATEST)                }
             }
         }
         stage('Push to Docker Hub') {
