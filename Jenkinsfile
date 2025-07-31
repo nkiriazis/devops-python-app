@@ -118,13 +118,16 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build and tag with both build number and latest
-                    dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG_BUILD}", ".")
-                    dockerImage.tag("${IMAGE_NAME}:${IMAGE_TAG_LATEST}")
+                        // Build and tag with the BUILD_NUMBER tag. The 'docker.build' step
+                        // returns an Image object that represents this specific image.
+                        dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG_BUILD}", ".")
+
+                        // Now, tag the *already built* dockerImage with the 'latest' tag.
+                        // You simply pass the full new tag string.
+                        dockerImage.tag("${IMAGE_NAME}:${IMAGE_TAG_LATEST}") // This line is the fix!
                 }
             }
         }
-
         stage('Push to Docker Hub') {
             steps {
                 script {
@@ -132,11 +135,11 @@ pipeline {
                     docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-creds') {
                         dockerImage.push("${IMAGE_TAG_BUILD}")
                         dockerImage.push("${IMAGE_TAG_LATEST}")
-                    }
                 }
             }
         }
     }
+}
 
     post {
         always {
