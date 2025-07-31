@@ -1,16 +1,34 @@
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: python-app-staging
+#   namespace: argocd
+# spec:
+#   project: default
+#   source:
+#     repoURL: https://github.com/nkiriazis/python-app.git
+#     targetRevision: HEAD
+#     path: k8s/overlays/staging
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: staging
+#   syncPolicy:
+#     automated:
+#       prune: true
+#       selfHeal: true
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: python-app-staging
+  name: flask-app-staging
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: https://github.com/nkiriazis/python-app.git
+    repoURL: 'https://github.com/nkiriazis/flask-app.git'
     targetRevision: HEAD
-    path: k8s/overlays/staging
+    path: k8s  # You create this folder with your k8s manifests
   destination:
-    server: https://kubernetes.default.svc
+    server: 'https://kubernetes.default.svc'
     namespace: staging
   syncPolicy:
     automated:
