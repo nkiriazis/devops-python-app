@@ -50,6 +50,7 @@ spec:
       containers:
       - name: flask-app
         image: returnick/flask-app:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         resources:
