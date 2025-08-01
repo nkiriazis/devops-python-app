@@ -1,23 +1,6 @@
 This project demonstrates a full CI/CD pipeline for a Python Flask app, leveraging Jenkins, Docker, Kubernetes, ArgoCD, and Traefik with IP whitelisting and TLS.
 Project Structure
 
-.
-├── argocd/                 # ArgoCD app manifests and ingress
-│   ├── applications/       # Dev & staging app CRs
-│   └── ingress/            # Traefik IngressRoute manifests
-├── base/                   # Kustomize base resources
-│   ├── cert/               # TLS certs (optional)
-│   ├── rbac/               # Cluster-wide RBAC manifests
-│   ├── ingressroute.yaml   # Base ingress config
-│   ├── service.yaml        # Kubernetes Service
-│   ├── deployment.yaml     # Kubernetes Deployment
-│   └── kustomization.yaml
-├── overlays/
-│   ├── dev/                # Dev environment overlays
-│   └── staging/            # Staging environment overlays
-
----
-
 ## 🔄 CI/CD Pipeline
 
 ### 🔧 Jenkins
