@@ -1,2 +1,12 @@
 resources:
   - ../../base
+  - configmap.yaml
+  - ingressroute.yaml
+  - rbac/role.yaml
+  - rbac/rolebinding.yaml
+
+namespace: staging
+
+images:
+  - name: returnick/flask-app
+    newTag: "0.0.1"

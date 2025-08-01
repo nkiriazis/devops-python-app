@@ -49,9 +49,9 @@ spec:
     spec:
       containers:
       - name: flask-app
-        image: returnick/flask-app:0.0.1  # Use proper image tag here, parametrize if needed
+        image: returnick/flask-app
         ports:
-        - containerPort: 5000
+        - containerPort: 8080
         resources:
           requests:
             cpu: "100m"

@@ -16,21 +16,30 @@
 #     automated:
 #       prune: true
 #       selfHeal: true
+
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: flask-app-staging
   namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: returnick/flask-app
+    argocd-image-updater.argoproj.io/write-back-method: git
+    argocd-image-updater.argoproj.io/git-branch: main
+    argocd-image-updater.argoproj.io/git-credentials: git-creds
+    argocd-image-updater.argoproj.io/image.returnick_flask-app.update-strategy: latest
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/nkiriazis/flask-app.git'
-    targetRevision: HEAD
-    path: devops-python-app # You create this folder with your k8s manifests
+    repoURL: https://github.com/nkiriazis/devops-python-app.git
+    targetRevision: main
+    path: overlays/staging
   destination:
-    server: 'https://kubernetes.default.svc'
-    namespace: staging
+    server: https://kubernetes.default.svc
+    namespace: dev
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
