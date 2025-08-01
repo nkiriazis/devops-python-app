@@ -49,10 +49,9 @@ spec:
     spec:
       containers:
       - name: flask-app
-        image: returnick/flask-app:latest
-        imagePullPolicy: Always
+        image: returnick/flask-app
         ports:
-        - containerPort: 8080
+        - containerPort: 
         resources:
           requests:
             cpu: "100m"

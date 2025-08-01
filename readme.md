@@ -77,6 +77,87 @@ Project Structure
   argocd app sync flask-app-dev
   argocd app sync flask-app-staging
 
+---
+
+This project demonstrates a full CI/CD pipeline for a Python Flask app, leveraging Jenkins, Docker, Kubernetes, ArgoCD, and Traefik with IP whitelisting and TLS.
+Project Structure
+
+.
+├── argocd/                 # ArgoCD app manifests and ingress
+│   ├── applications/       # Dev & staging app CRs
+│   └── ingress/            # Traefik IngressRoute manifests
+├── base/                   # Kustomize base resources
+│   ├── cert/               # TLS certs (optional)
+│   ├── rbac/               # Cluster-wide RBAC manifests
+│   ├── ingressroute.yaml   # Base ingress config
+│   ├── service.yaml        # Kubernetes Service
+│   ├── deployment.yaml     # Kubernetes Deployment
+│   └── kustomization.yaml
+├── overlays/
+│   ├── dev/                # Dev environment overlays
+│   └── staging/            # Staging environment overlays
+
+---
+
+## 🔄 CI/CD Pipeline
+
+### 🔧 Jenkins
+
+- Triggered on Git commits  
+- Builds Flask app Docker image  
+- Pushes images to Docker Hub  
+- Publishes build results  
+
+### 🎯 ArgoCD
+
+- Watches dev & staging overlays  
+- Syncs Kubernetes manifests automatically  
+- Manages app deployment and updates  
+
+### ☸️ Kubernetes Setup
+
+- Local cluster (Kind, Minikube, or K3s)  
+- Traefik ingress controller using IngressRoute CRDs  
+- IP whitelisting for security  
+- TLS via self-signed certs or Let’s Encrypt  
+
+---
+
+## 🔐 RBAC Access Model
+
+| Group       | Access                                  |
+|-------------|---------------------------------------|
+| 👷 DevOps      | Full cluster-admin                     |
+| 🧪 QA          | Full access except delete in dev & staging |
+| 👨‍💻 Developer  | Read-only access in dev namespace     |
+
+- RBAC manifests located in `base/rbac/` and environment overlays.
+
+---
+
+## 🌐 Usage Notes
+
+- Ingress example host for dev:  
+  `python-app.192.168.1.165.nip.io`
+
+- Ingress example host for staging:  
+  `python-app-staging.192.168.1.165.nip.io`
+
+- Ensure Traefik CRDs use:  
+  `apiVersion: traefik.io/v1alpha1`
+
+- Docker image tagging example:  
+  `docker.io/<your-username>/python-app:<tag>`
+
+---
+
+## 📝 Commands
+
+- ArgoCD sync apps:  
+  ```bash
+  argocd app sync flask-app-dev
+  argocd app sync flask-app-staging
+
 
 Project Overview
 
