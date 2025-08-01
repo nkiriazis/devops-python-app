@@ -1,0 +1,56 @@
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   name: python-app
+#   namespace: default
+# spec:
+#   entryPoints:
+#     - web      
+#   routes:
+#   - match: Host(`python-app.local`)  
+#     kind: Rule
+#     services:
+#     - name: python-app
+#       port: 80    
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: flask-app-ingress
+#   annotations:
+#     traefik.ingress.kubernetes.io/router.entrypoints: web
+#     traefik.ingress.kubernetes.io/router.middlewares: ip-whitelist@kubernetescrd
+# spec:
+#   rules:
+#   - host: flask-app.local
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: flask-app
+#             port:
+#               number: 80
+# ---
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: Middleware
+# metadata:
+#   name: ip-whitelist
+# spec:
+#   ipWhiteList:
+#     sourceRange:
+#     - 195.20.114.76/32
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: flask-app
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`flask-dev.example.com`)
+      kind: Rule
+      services:
+        - name: flask-app
+          port: 80
