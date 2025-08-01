@@ -2,8 +2,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingressroute.yaml
-  - namespaces.yaml
-
+  
 images:
   - name: returnick/flask-app
     newTag: "0.0.1"
