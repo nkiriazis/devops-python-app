@@ -26,7 +26,7 @@ spec:
   source:
     repoURL: 'https://github.com/nkiriazis/flask-app.git'
     targetRevision: HEAD
-    path: k8s  # You create this folder with your k8s manifests
+    path: devops-python-app  # You create this folder with your k8s manifests
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: dev
