@@ -3,6 +3,6 @@ resources:
   - service.yaml
   - ingressroute.yaml
   
-images:
-  - name: returnick/flask-app
-    newTag: "0.0.1"
+# images:
+#   - name: returnick/flask-app
+#     newTag: "0.0.1"
